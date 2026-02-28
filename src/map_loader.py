@@ -13,8 +13,6 @@ ox.settings.overpass_max_query_area_size = 50_000_000  # increase max query area
 
 bbox = (74.347, 31.505, 74.370, 31.535) 
 
-north, south, east, west = bbox
-
 def remove_isolated_nodes(G):
     isolated = list(nx.isolates(G))
     G_clean = G.copy()
@@ -33,7 +31,6 @@ def get_graph_stats(G):
 def bake_map():
     os.makedirs(DATA_DIR, exist_ok=True)
 
-    # 🟢 If GraphML already exists → load instead of recreate
     if os.path.exists(GRAPH_PATH):
         print("GraphML exists. Loading from disk...")
         G = nx.read_graphml(GRAPH_PATH)
@@ -59,8 +56,6 @@ def bake_map():
 
     with open(STATS_PATH, "w") as f:
         json.dump(stats, f, indent=4)
-
-    # 🔄 Verify reload
     G_test = nx.read_graphml(GRAPH_PATH)
     assert G_test.number_of_nodes() > 0
     print("Reload verification successful.")
