@@ -1,6 +1,6 @@
 import networkx as nx
 
-G = nx.read_graphml("data/model_town.graphml")
+G = nx.read_graphml("../data/model_town.graphml")
 
 # Pick any node
 node = list(G.nodes)[0]
