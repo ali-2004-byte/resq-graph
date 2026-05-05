@@ -2,8 +2,8 @@ import heapq
 import math
 
 def haversine(G, u, v):
-    lat1, lon1 = G.nodes[u]['y'], G.nodes[u]['x']
-    lat2, lon2 = G.nodes[v]['y'], G.nodes[v]['x']
+    lat1, lon1 = float(G.nodes[u]['y']), float(G.nodes[u]['x'])
+    lat2, lon2 = float(G.nodes[v]['y']), float(G.nodes[v]['x'])
     R = 6371000
     phi1, phi2 = math.radians(lat1), math.radians(lat2)
     dphi = math.radians(lat2 - lat1)
