@@ -1,5 +1,6 @@
 import math
 from enum import Enum
+from typing import Optional
 from src.astar import astar
 
 class AmbulanceState(Enum):
@@ -12,22 +13,36 @@ class Ambulance:
         self.id = id
         self.state = AmbulanceState.IDLE
         self.current_location = start_node
-        self.pixel_pos = (0.0, 0.0) 
+        self.pixel_pos = (0.0, 0.0)
         self.current_path = []
         self.assigned_task = None
         self.progress = 0.0
         self.speed = 1.00  # Nodes traversed per tick (adjust as needed)
         self.graph = graph
+        # Sprint 5 fields
+        self.pixel_polyline: list[tuple[int, int]] = []   # pre-computed by dispatcher
+        self.dispatch_tick: Optional[int] = None          # tick when assigned
 
-    def navigate(self, destination: int) -> None:
-        """Compute A* path from current_location to destination."""
-        path = astar(self.graph, self.current_location, destination)
+    def navigate(self, destination: int, path: Optional[list] = None) -> None:
+        """Set navigation state toward destination.
+
+        Parameters
+        ----------
+        destination : int
+            Target graph node ID.
+        path : list, optional
+            Pre-computed A* path (list of node IDs).  When supplied by the
+            DispatcherBrain the path is used directly, avoiding a duplicate
+            A* call.  If omitted the ambulance computes its own path.
+        """
+        if path is None:
+            path = astar(self.graph, self.current_location, destination)
         if path:
             self.current_path = path
             self.state = AmbulanceState.IN_TRANSIT
             self.progress = 0.0
         else:
-            # Fallback direct
+            # Fallback: straight two-node path
             self.current_path = [self.current_location, destination]
             self.state = AmbulanceState.IN_TRANSIT
             self.progress = 0.0
@@ -99,9 +114,12 @@ class Ambulance:
         }
 
     def complete_task(self) -> None:
+        """Reset ambulance to IDLE.  Called by dispatcher; also clears Sprint 5 fields."""
         if self.assigned_task:
             self.assigned_task.resolved = True
-        self.assigned_task = None
-        self.current_path = []
-        self.state = AmbulanceState.IDLE
-        self.progress = 0.0
+        self.assigned_task   = None
+        self.current_path    = []
+        self.pixel_polyline  = []   # Sprint 5: clear cached path for renderer
+        self.dispatch_tick   = None # Sprint 5
+        self.state           = AmbulanceState.IDLE
+        self.progress        = 0.0

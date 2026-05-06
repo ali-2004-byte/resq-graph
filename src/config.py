@@ -20,3 +20,19 @@ COLOUR_ON_SCENE  = (220,  30, 30)
 COLOUR_ACCIDENT  = (255,   0,  0)
 HUD_BG_COLOUR    = (20,  20,  20)
 HUD_TEXT_COLOUR  = (255, 255, 255)
+
+# ── Sprint 5: Dispatcher ───────────────────────────────────────────────────────
+REBALANCE_INTERVAL   = 50        # ticks between fleet rebalance calls
+SCENE_SERVICE_TICKS  = 10        # ticks ambulance spends ON_SCENE before completing
+
+# ── Sprint 5: Metrics ──────────────────────────────────────────────────────────
+METRICS_CSV_PATH       = "outputs/metrics_events.csv"
+METRICS_SUMMARY_PATH   = "outputs/metrics_summary.csv"
+METRICS_FLUSH_INTERVAL = 100     # write to CSV every N ticks
+
+# ── Sprint 5: Dashed-path rendering ───────────────────────────────────────────
+DASHED_LINE_COLOUR   = (100, 180, 255)   # light blue
+DASHED_SEGMENT_LEN   = 8                 # pixels per dash
+DASHED_GAP_LEN       = 5                 # pixels per gap
+METRICS_PANEL_WIDTH  = 300
+METRICS_PANEL_HEIGHT = 220

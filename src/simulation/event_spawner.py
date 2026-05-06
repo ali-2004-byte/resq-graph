@@ -5,12 +5,14 @@ from typing import Optional
 @dataclass
 class Accident:
     id:        int
-    timestamp: int           # simulation tick when spawned
-    location:  int           # graph node ID
+    timestamp: int              # simulation tick when spawned (spawn_tick)
+    location:  int              # graph node ID
     pixel_pos: tuple[int, int]  # resolved from node_positions.json (for Pygame rendering)
-    priority:  int           # 1 (high) – 3 (low)
-    resolved:  bool = False
+    priority:  int              # 1 (high) – 3 (low)
+    resolved:  bool             = False
     assigned_ambulance_id: Optional[int] = None
+    dispatch_tick: Optional[int] = None  # Sprint 5: tick when assign_task() was called
+
 
 
 class EventSpawner:

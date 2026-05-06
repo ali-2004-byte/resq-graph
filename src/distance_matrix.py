@@ -13,7 +13,10 @@ def compute_distance_matrix(G, save_path="data/distance_matrix.npy"):
     n = len(nodes)
     dist_matrix = np.full((n, n), np.inf)
 
-    for source, lengths in nx.all_pairs_dijkstra_path_length(G, weight="length"):
+    def weight_func(u, v, d):
+        return min(float(e.get('length', 1)) for e in d.values())
+
+    for source, lengths in nx.all_pairs_dijkstra_path_length(G, weight=weight_func):
         i = node_index[source]
         for target, dist in lengths.items():
             j = node_index[target]

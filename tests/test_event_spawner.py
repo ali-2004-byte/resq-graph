@@ -3,9 +3,10 @@ from src.simulation.event_spawner import EventSpawner, Accident
 
 @pytest.fixture
 def node_positions():
+    # Production code uses pos[0] / pos[1], so values are lists not dicts
     return {
-        1: {"x": 100, "y": 100},
-        2: {"x": 200, "y": 200}
+        1: [100, 100],
+        2: [200, 200],
     }
 
 def test_poisson_distribution(node_positions):
