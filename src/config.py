@@ -14,7 +14,7 @@ WINDOW_HEIGHT    = 900
 REDRAW_INTERVAL  = 1          # redraw every N ticks
 
 # Colours (R, G, B)
-COLOUR_IDLE      = (0,   200,  0)
+COLOUR_IDLE      = (255, 255, 255)  # White (changed from Green to stand out)
 COLOUR_TRANSIT   = (255, 220,  0)
 COLOUR_ON_SCENE  = (220,  30, 30)
 COLOUR_ACCIDENT  = (255,   0,  0)

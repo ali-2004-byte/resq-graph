@@ -90,7 +90,8 @@ def _minimal_yaml_parse(path: str) -> dict:
 
             key, _, value = line.partition(":")
             key   = key.strip()
-            value = value.strip()
+            # Strip inline comments before processing the value
+            value = value.partition("#")[0].strip()
 
             if indent == 0 and key == "profiles":
                 in_profiles = True

@@ -170,8 +170,9 @@ class PygameRenderer:
             self.draw_metrics_panel(hud_data, len(active_events))
 
         # ── Layer 9: Log strip ─────────────────────────────────────────────
-        if log_buffer is not None:
-            self._draw_log_strip(log_buffer)
+        # (Hidden by default to keep UI clean)
+        # if log_buffer is not None:
+        #    self._draw_log_strip(log_buffer)
 
         # ── Layer 10: Full log history overlay ────────────────────────────
         if show_log and log_buffer is not None:

@@ -242,8 +242,8 @@ def run_simulation() -> None:
 
     # ── Toggle states ──────────────────────────────────────────────────────
     show_metrics_panel = False
-    show_hotspots      = True
-    show_traffic       = True
+    show_hotspots      = False
+    show_traffic       = False
     show_log           = False
     running            = True
 

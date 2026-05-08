@@ -275,6 +275,11 @@ class HDBSCAN:
                 point_ids=[i],
             )
 
+        # BUG FIX: map each UF root → the current tree node that represents
+        # that component.  Without this, re-merging a UF root overwrites its
+        # parent_id/death_level in the tree, corrupting the condensed tree.
+        uf_to_node: dict[int, int] = {i: i for i in range(n_points)}
+
         # Process edges in ascending weight order (→ increasing λ = 1/w)
         for edge in mst:
             w   = max(edge.weight, 1e-12)   # guard against zero-weight edges
@@ -288,6 +293,10 @@ class HDBSCAN:
             size_c = comp_size[rc]
             size_d = comp_size[rd]
 
+            # Resolve to the correct tree nodes BEFORE the union mutates roots
+            node_c = uf_to_node[rc]
+            node_d = uf_to_node[rd]
+
             new_root = union(rc, rd)
             nid      = next_id[0]
             next_id[0] += 1
@@ -299,21 +308,21 @@ class HDBSCAN:
                 birth_level=lam,
                 death_level=None,
                 size=size_c + size_d,
-                children=[rc, rd],
+                children=[node_c, node_d],
             )
-            # Wire children
-            if rc in tree:
-                tree[rc].parent_id    = nid
-                tree[rc].death_level  = lam
-            if rd in tree:
-                tree[rd].parent_id    = nid
-                tree[rd].death_level  = lam
+            # Wire children to this new parent
+            tree[node_c].parent_id   = nid
+            tree[node_c].death_level = lam
+            tree[node_d].parent_id   = nid
+            tree[node_d].death_level = lam
 
             # Condense small components into noise
-            for child in (rc, rd):
-                if child in tree and tree[child].size < self.min_cluster_size:
-                    # Mark this sub-tree as noise (no valid cluster)
-                    tree[child].death_level = lam
+            for child_nid in (node_c, node_d):
+                if tree[child_nid].size < self.min_cluster_size:
+                    tree[child_nid].death_level = lam
+
+            # The new UF root now maps to the freshly-created internal node
+            uf_to_node[new_root] = nid
 
         # The last merged node is the root
         root_id = next_id[0] - 1
@@ -333,57 +342,62 @@ class HDBSCAN:
         selected : set[int]
             Node IDs of the chosen clusters.
         """
-        # Compute stability S(C) = Σ_{i ∈ C} (λ_death(i) - λ_birth(C))
+        # BUG FIX: stability[nid] must store the node's OWN Excess-of-Mass
+        # contribution, not max(own, children_sum).  The old code stored the
+        # max, so s_node always equalled s_children at the root, preventing
+        # the algorithm from ever descending into sub-clusters.
         stability: dict[int, float] = {}
 
-        def _collect_leaves(nid: int) -> list[int]:
+        def _own_stability(nid: int) -> float:
+            """Excess of Mass for this node: (λ_birth − λ_death) × size.
+
+            In the bottom-up condensed tree:
+              birth_level = λ at which this node was *created* (tight, high λ)
+              death_level = λ at which it was absorbed into its parent (loose, low λ)
+            so birth_level > death_level and stability = (birth − death) × size.
+            The root has no parent → death_level is None → stability = 0,
+            which guarantees the root is never selected over its children.
+            """
             node = tree.get(nid)
-            if node is None:
-                return []
-            if not node.children:
-                return [nid]
-            leaves: list[int] = []
-            for child in node.children:
-                leaves.extend(_collect_leaves(child))
-            return leaves
+            if node is None or node.death_level is None:
+                return 0.0
+            return max(0.0, node.birth_level - node.death_level) * node.size
 
         def _compute_stability(nid: int) -> float:
+            """Recursively compute and cache own stability; return subtree max."""
             node = tree.get(nid)
             if node is None:
                 return 0.0
+            own = _own_stability(nid)
+            stability[nid] = own          # store OWN value for the selector
             if not node.children:
-                # Leaf: single-point cluster
-                lam_birth = node.birth_level
-                lam_death = node.death_level or lam_birth
-                return max(0.0, lam_death - lam_birth) * node.size
-
-            total = 0.0
-            for child in node.children:
-                total += _compute_stability(child)
-            lam_birth = node.birth_level
-            # Internal node stability from all descendant points
-            lam_death = node.death_level or lam_birth
-            own = max(0.0, lam_death - lam_birth) * node.size
-            s = own if own > total else total
-            stability[nid] = s
-            return s
+                return own
+            children_sum = sum(_compute_stability(c) for c in node.children)
+            # Return the running subtree maximum (used only during recursion)
+            return max(own, children_sum)
 
         _compute_stability(root_id)
 
-        # Greedy selection: prefer children over parent if their combined
-        # stability exceeds the parent's; otherwise keep the parent.
+        # Greedy selection: if the sum of children's own stabilities exceeds
+        # this node's own stability, descend; otherwise select this node.
         selected: set[int] = set()
 
         def _select(nid: int) -> None:
             node = tree.get(nid)
             if node is None or not node.children:
-                # Leaf – eligible only if large enough
                 if node and node.size >= self.min_cluster_size:
                     selected.add(nid)
                 return
+
+            # Only descend if at least one child can itself form a valid cluster;
+            # otherwise the parent is the finest selectable cluster.
+            viable = [
+                c for c in node.children
+                if tree.get(c) and tree[c].size >= self.min_cluster_size
+            ]
             s_node     = stability.get(nid, 0.0)
             s_children = sum(stability.get(c, 0.0) for c in node.children)
-            if s_children > s_node:
+            if viable and s_children > s_node:
                 for child in node.children:
                     _select(child)
             else:
