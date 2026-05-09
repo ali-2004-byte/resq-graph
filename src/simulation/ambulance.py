@@ -13,6 +13,7 @@ class Ambulance:
     def __init__(self, id: int, start_node: int, graph):
         self.id = id
         self.state = AmbulanceState.IDLE
+        self.home_node = start_node                       # Sprint 10: AI fleet base return target
         self.current_location = start_node
         self.pixel_pos = (0.0, 0.0)
         self.current_path = []

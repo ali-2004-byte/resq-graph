@@ -247,7 +247,32 @@ class DispatcherBrain:
         self.hotspots = self._clusterer.run(self.active_events)
 
         if not self.hotspots:
-            logger.debug("Rebalance tick %d: no hotspots found.", current_tick)
+            logger.debug("Rebalance tick %d: no hotspots found. Checking for base return.", current_tick)
+            idle_ambs = self.get_idle_ambulances()
+            for amb in idle_ambs:
+                if amb.current_location != amb.home_node:
+                    path = astar_traffic(
+                        self.graph,
+                        amb.current_location,
+                        amb.home_node,
+                        self.traffic,
+                    )
+                    if path is not None:
+                        amb.rebalance_target = amb.home_node
+                        amb.pixel_polyline = [
+                            self._node_to_pixel(n)
+                            for n in path
+                            if n in self.node_positions
+                        ]
+                        amb.navigate(
+                            destination=amb.home_node,
+                            path=path,
+                            rebalancing=True,
+                        )
+                        logger.info(
+                            "Ambulance %d → RETURNING TO BASE node %d.",
+                            amb.id, amb.home_node,
+                        )
             return
 
         idle_ambs = self.get_idle_ambulances()

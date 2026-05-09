@@ -44,7 +44,13 @@ def load_graph_and_matrix():
         G.nodes[node]["x"] = float(G.nodes[node]["x"])
         G.nodes[node]["y"] = float(G.nodes[node]["y"])
 
-    distance_matrix = np.load("data/distance_matrix.npy")
+    import os
+    if os.path.exists("data/traffic_distance_matrix.npy"):
+        print("Using TRAFFIC-AWARE distance matrix.")
+        distance_matrix = np.load("data/traffic_distance_matrix.npy")
+    else:
+        distance_matrix = np.load("data/distance_matrix.npy")
+        
     nodes = list(G.nodes())
     return G, distance_matrix, nodes
 
@@ -260,7 +266,11 @@ def main():
     print(f"Reachable nodes: {reachable_mask.sum()}/{len(nodes)}")
 
     print("\nInitializing fitness function...")
-    fitness_fn = load_fitness_function(nodes=nodes)
+    import os
+    if os.path.exists("data/traffic_distance_matrix.npy"):
+        fitness_fn = load_fitness_function(distance_matrix_path="data/traffic_distance_matrix.npy", nodes=nodes)
+    else:
+        fitness_fn = load_fitness_function(nodes=nodes)
 
     ga = GeneticAlgorithm(nodes)
     print(f"\nRunning GA (Pop: {ga.pop_size}, Mutation: {ga.mutation_rate})...")
@@ -310,8 +320,12 @@ def main():
             for n in G.nodes
         }
 
-    print("\nOpening interactive Pygame viewer (V=coverage, C=compare, S=screenshot, ESC=quit)…")
-    visualize_stations_pygame(G, best_genome, node_positions)
+    import os
+    if os.environ.get("SDL_VIDEODRIVER") == "dummy":
+        print("\nHeadless mode detected, skipping Pygame viewer.")
+    else:
+        print("\nOpening interactive Pygame viewer (V=coverage, C=compare, S=screenshot, ESC=quit)…")
+        visualize_stations_pygame(G, best_genome, node_positions)
 
     return best_genome, ga.fitness_history
 

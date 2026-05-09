@@ -579,3 +579,11 @@
 11:26:04 [[32mINFO[0m] src.simulation.simulation_engine: Simulation ended at tick 37.
 11:26:04 [[32mINFO[0m] src.simulation.metrics_tracker: No events resolved; skipping summary CSV export.
 11:26:04 [[32mINFO[0m] src.sim_config_loader: Loaded base config from headless_ai.yaml
+12:47:33 [[32mINFO[0m] src.simulation.sim_logger: Logging configured: level=INFO, file=outputs/sim.log
+12:47:35 [[32mINFO[0m] src.simulation.simulation_engine: Loading distance matrix from data/distance_matrix.npy ...
+12:47:35 [[32mINFO[0m] src.simulation.simulation_engine: Traffic model initialised (max_mult=2.5).
+12:47:35 [[32mINFO[0m] src.simulation.simulation_engine: Simulation starting: 5 ambulances, 10000 ticks, profile=None.
+12:47:38 [[32mINFO[0m] src.simulation.simulation_engine: Transitioning to split-screen demo...
+12:47:38 [[32mINFO[0m] src.simulation.simulation_engine: Simulation ended at tick 77.
+12:47:38 [[32mINFO[0m] src.simulation.metrics_tracker: Summary CSV written to outputs/metrics_summary.csv
+12:47:39 [[32mINFO[0m] src.sim_config_loader: Loaded base config from headless_ai.yaml

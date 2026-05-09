@@ -190,8 +190,10 @@ def _read_last_run_response_times() -> list[float]:
                 rt_key = "response_time"
                 if rt_key in row:
                     try:
-                        times.append(float(row[rt_key]))
-                    except ValueError:
+                        val = row.get(rt_key)
+                        if val is not None and val.strip() != "":
+                            times.append(float(val))
+                    except (ValueError, TypeError):
                         pass
     except OSError:
         pass

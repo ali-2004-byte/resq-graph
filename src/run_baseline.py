@@ -190,11 +190,11 @@ def _read_last_run_stats() -> tuple[float, float, int]:
             reader = csv.DictReader(fh)
             for row in reader:
                 return (
-                    float(row.get("art",        0)),
-                    float(row.get("std_dev",     0)),
-                    int(row.get("total_events", 0)),
+                    float(row.get("art",        0) or 0),
+                    float(row.get("std_dev",     0) or 0),
+                    int(row.get("total_events", 0) or 0),
                 )
-    except (OSError, KeyError, ValueError):
+    except (OSError, KeyError, ValueError, TypeError):
         pass
     return 0.0, 0.0, 0
 
