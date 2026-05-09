@@ -77,15 +77,21 @@ class PygameRenderer:
    10  Log history overlay         (L key)
     """
 
-    def __init__(self, screen: pygame.Surface, node_positions: dict):
+    def __init__(self, screen: pygame.Surface, node_positions: dict,
+                 bg_image_path: str = "data/map_bg.png"):
         self.screen         = screen
         self.node_positions = node_positions
 
         # ── Background ─────────────────────────────────────────────────────
-        bg_image   = pygame.image.load("data/map_bg.png").convert()
+        try:
+            bg_image   = pygame.image.load(bg_image_path).convert()
+        except (pygame.error, FileNotFoundError):
+            bg_image   = pygame.Surface((1, 1))
         self.padding    = 40
-        drawable_w = WINDOW_WIDTH  - 2 * self.padding
-        drawable_h = WINDOW_HEIGHT - 2 * self.padding
+        sw = screen.get_width()
+        sh = screen.get_height()
+        drawable_w = max(1, sw - 2 * self.padding)
+        drawable_h = max(1, sh - 2 * self.padding)
         self.background = pygame.transform.scale(bg_image, (drawable_w, drawable_h))
 
         # ── Fonts ──────────────────────────────────────────────────────────
