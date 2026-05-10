@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ResQ-Graph — Final Presentation</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:#0f172a;color:#e2e8f0;overflow:hidden}
+.slide{width:100vw;height:100vh;display:none;flex-direction:column;justify-content:center;padding:60px 80px;position:relative}
+.slide.active{display:flex}
+.slide-num{position:absolute;bottom:20px;right:40px;font-size:14px;color:#64748b}
+h1{font-size:52px;font-weight:700;margin-bottom:20px;background:linear-gradient(135deg,#818cf8,#34d399);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+h2{font-size:38px;font-weight:600;margin-bottom:24px;color:#818cf8}
+h3{font-size:22px;font-weight:600;margin:14px 0 8px;color:#34d399}
+p,li{font-size:20px;line-height:1.5;color:#cbd5e1}
+ul{list-style:none;padding-left:0}
+li{padding:4px 0;padding-left:24px;position:relative}
+li::before{content:'▸';position:absolute;left:0;color:#818cf8}
+table{width:100%;border-collapse:collapse;margin:12px 0;font-size:18px}
+th{background:#1e293b;color:#818cf8;padding:10px 14px;text-align:left;border-bottom:2px solid #334155}
+td{padding:8px 14px;border-bottom:1px solid #1e293b}
+tr:hover td{background:#1e293b}
+.subtitle{font-size:26px;color:#94a3b8;margin-bottom:30px}
+.highlight{color:#34d399;font-weight:600}
+.stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin:20px 0}
+.stat-card{background:#1e293b;border-radius:12px;padding:24px;text-align:center;border:1px solid #334155}
+.stat-card .num{font-size:38px;font-weight:700;color:#818cf8}
+.stat-card .label{font-size:15px;color:#94a3b8;margin-top:4px}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:30px;align-items:start}
+.tag{display:inline-block;background:#1e293b;border:1px solid #334155;border-radius:6px;padding:4px 12px;font-size:16px;color:#94a3b8;margin:3px}
+.source{font-size:13px;color:#475569;margin-top:12px;font-style:italic}
+nav{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);display:flex;gap:12px;z-index:10}
+nav button{background:#1e293b;color:#e2e8f0;border:1px solid #334155;border-radius:8px;padding:10px 24px;cursor:pointer;font-size:16px}
+nav button:hover{background:#334155}
+.arch-box{background:#1e293b;border:1px solid #334155;border-radius:8px;padding:12px 16px;margin:5px 0;font-size:17px}
+.arch-box span{color:#818cf8;font-weight:600}
+.img-frame{border-radius:10px;border:1px solid #334155;max-height:320px;object-fit:contain;background:#1e293b;padding:4px}
+.img-frame-sm{border-radius:8px;border:1px solid #334155;max-height:260px;object-fit:contain;background:#1e293b;padding:4px}
+.img-caption{font-size:13px;color:#64748b;text-align:center;margin-top:4px}
+</style>
+</head>
+<body>
+
+<!-- SLIDE 1: Title -->
+<div class="slide active" id="s1">
+  <h1>ResQ-Graph</h1>
+  <p class="subtitle">Agent-Based Emergency Ambulance Dispatch Simulation<br>with AI-Optimised Fleet Placement</p>
+  <div style="margin-top:30px">
+    <div class="tag">Python</div><div class="tag">NetworkX</div><div class="tag">Pygame</div>
+    <div class="tag">A* Pathfinding</div><div class="tag">HDBSCAN</div><div class="tag">Genetic Algorithm</div>
+  </div>
+  <div class="slide-num">1 / 8</div>
+</div>
+
+<!-- SLIDE 2: Introduction -->
+<div class="slide" id="s2">
+  <h2>Introduction</h2>
+  <div class="two-col">
+    <div>
+      <p style="margin-bottom:20px">ResQ-Graph models a fleet of ambulances navigating a real road network to respond to dynamically generated emergencies. The goal: <span class="highlight">minimise Average Response Time (ART)</span> through intelligent dispatch, clustering, and station placement.</p>
+      <div class="stat-grid" style="grid-template-columns:1fr 1fr 1fr">
+        <div class="stat-card"><div class="num">798</div><div class="label">Road Nodes</div></div>
+        <div class="stat-card"><div class="num">12</div><div class="label">Sprints</div></div>
+        <div class="stat-card"><div class="num">224</div><div class="label">Tests</div></div>
+      </div>
+      <h3>Problem Statement</h3>
+      <p>Random ambulance station placement leads to uneven coverage, long travel distances, and high response times. Can AI optimise placement to consistently reduce ART?</p>
+    </div>
+    <div style="text-align:center">
+      <img src="outputs/optimal_stations.png" class="img-frame" alt="Optimal vs Random Stations on Map">
+      <div class="img-caption">GA-optimised stations (stars) vs random placement (circles) on the road network</div>
+    </div>
+  </div>
+  <p class="source">Data: data/model_town.graphml, outputs/optimal_stations.png</p>
+  <div class="slide-num">2 / 8</div>
+</div>
+
+<!-- SLIDE 3: System Architecture -->
+<div class="slide" id="s3">
+  <h2>System Architecture</h2>
+  <div class="two-col">
+    <div>
+      <div class="arch-box"><span>Simulation Engine</span> — Tick-based loop orchestrating all subsystems</div>
+      <div class="arch-box"><span>A* Pathfinding</span> — Haversine heuristic with traffic-aware rerouting</div>
+      <div class="arch-box"><span>Traffic Model</span> — Dynamic edge congestion based on event density</div>
+      <div class="arch-box"><span>Event Spawner</span> — Poisson-distributed emergency generation</div>
+      <div class="arch-box"><span>Dispatcher Brain</span> — O(1) nearest-idle assignment via distance matrix</div>
+      <div class="arch-box"><span>HDBSCAN Clustering</span> — Custom from-scratch hotspot detection</div>
+      <div class="arch-box"><span>Genetic Algorithm</span> — Traffic-aware station placement optimiser</div>
+      <div class="arch-box"><span>Pygame Renderer</span> — Real-time visualisation with cached sprites</div>
+    </div>
+    <div style="text-align:center">
+      <img src="outputs/convergence_plot.png" class="img-frame" alt="GA Convergence Plot">
+      <div class="img-caption">GA fitness convergence over 100 generations — rapid optimisation in first 10 generations</div>
+      <br>
+      <img src="outputs/figures/comparison_coverage_heatmap.png" class="img-frame-sm" alt="Coverage Heatmap">
+      <div class="img-caption">AI fleet coverage heatmap — green = well covered, red = far from nearest station</div>
+    </div>
+  </div>
+  <p class="source">Data: outputs/convergence_plot.png, outputs/figures/comparison_coverage_heatmap.png</p>
+  <div class="slide-num">3 / 8</div>
+</div>
+
+<!-- SLIDE 4: Methodology -->
+<div class="slide" id="s4">
+  <h2>Methodology</h2>
+  <div class="two-col">
+    <div>
+      <h3>Experimental Design</h3>
+      <ul>
+        <li><strong>Baseline:</strong> 10 runs &times; 1000 ticks, random station placement</li>
+        <li><strong>AI Fleet:</strong> 10 runs &times; 1000 ticks, GA-optimised stations</li>
+        <li><strong>Seed parity:</strong> Identical event seeds for fair comparison</li>
+        <li><strong>Metric:</strong> Average Response Time (arrival_tick &minus; spawn_tick)</li>
+        <li><strong>Statistical test:</strong> Paired two-tailed Student's t-test</li>
+      </ul>
+      <h3>Key Algorithms</h3>
+      <table>
+        <tr><th>Component</th><th>Technique</th></tr>
+        <tr><td>Pathfinding</td><td>A* + Haversine + closed-set pruning</td></tr>
+        <tr><td>Dispatch</td><td>Distance matrix O(1) lookup</td></tr>
+        <tr><td>Hotspots</td><td>Custom HDBSCAN (Excess of Mass)</td></tr>
+        <tr><td>Optimisation</td><td>Traffic-Aware Genetic Algorithm</td></tr>
+        <tr><td>Events</td><td>Poisson process (&lambda;=0.05)</td></tr>
+        <tr><td>Rerouting</td><td>Dynamic congestion threshold (20%)</td></tr>
+      </table>
+    </div>
+    <div style="text-align:center">
+      <img src="outputs/figures/comparison_station_placement.png" class="img-frame" alt="Station Placement Comparison">
+      <div class="img-caption">AI stations (stars) are spread for coverage; random placements (dots) cluster unevenly</div>
+      <h3>Sensitivity Sweep</h3>
+      <ul>
+        <li>215 runs across Lambda, Fleet Size, and HDBSCAN parameters</li>
+        <li>Identified optimal operational points for production</li>
+      </ul>
+    </div>
+  </div>
+  <p class="source">Data: headless_baseline.yaml, headless_ai.yaml, outputs/figures/comparison_station_placement.png</p>
+  <div class="slide-num">4 / 8</div>
+</div>
+
+<!-- SLIDE 5: Results — AI vs Baseline -->
+<div class="slide" id="s5">
+  <h2>Results — AI vs Random Baseline</h2>
+  <div class="stat-grid">
+    <div class="stat-card"><div class="num">25.81</div><div class="label">Baseline Mean ART (ticks)</div></div>
+    <div class="stat-card"><div class="num" style="color:#34d399">22.77</div><div class="label">AI Fleet Mean ART (ticks)</div></div>
+    <div class="stat-card"><div class="num" style="color:#fbbf24">+11.8%</div><div class="label">ART Improvement</div></div>
+  </div>
+  <div class="two-col" style="margin-top:16px">
+    <div>
+      <img src="outputs/figures/comparison_art_distribution.png" class="img-frame" style="width:100%" alt="ART Distribution">
+      <div class="img-caption">ART distribution — AI fleet (green) shifted left of baseline (purple)</div>
+      <h3>Statistical Significance</h3>
+      <table>
+        <tr><th>Metric</th><th>Value</th></tr>
+        <tr><td>Paired t-statistic</td><td>4.6855</td></tr>
+        <tr><td>p-value</td><td>0.0011</td></tr>
+        <tr><td>Cohen's d (effect size)</td><td>1.54 (large)</td></tr>
+        <tr><td>Significant (&alpha;=0.05)</td><td style="color:#34d399">Yes</td></tr>
+      </table>
+    </div>
+    <div>
+      <img src="outputs/figures/comparison_art_timeseries.png" class="img-frame" style="width:100%" alt="ART per Run">
+      <div class="img-caption">AI fleet (green) consistently outperforms baseline (purple) across all 10 runs</div>
+    </div>
+  </div>
+  <p class="source">Data: outputs/comparison_metrics.json, outputs/figures/comparison_art_distribution.png, outputs/figures/comparison_art_timeseries.png</p>
+  <div class="slide-num">5 / 8</div>
+</div>
+
+<!-- SLIDE 6: Results — Sensitivity & Performance -->
+<div class="slide" id="s6">
+  <h2>Results — Sensitivity Analysis & Performance</h2>
+  <div class="two-col">
+    <div>
+      <img src="outputs/figures/sensitivity_fleet_size.png" class="img-frame-sm" style="width:100%" alt="Fleet Size Sensitivity">
+      <div class="img-caption">ART vs fleet size — sweet spot at 7 ambulances</div>
+      <br>
+      <img src="outputs/figures/sensitivity_lambda.png" class="img-frame-sm" style="width:100%" alt="Lambda Sensitivity">
+      <div class="img-caption">ART vs event rate — AI advantage holds under normal demand (&lambda;&le;0.10)</div>
+    </div>
+    <div>
+      <h3>Optimal Parameters (215-run sweep)</h3>
+      <table>
+        <tr><th>Parameter</th><th>Optimal</th><th>Finding</th></tr>
+        <tr><td>Fleet Size</td><td>7 ambulances</td><td>Best cost-to-performance ratio</td></tr>
+        <tr><td>HDBSCAN cluster size</td><td>5</td><td>Precision vs sample balance</td></tr>
+        <tr><td>Rebalance interval</td><td>25 ticks</td><td>Keeps fleet agile</td></tr>
+        <tr><td>Fleet scaling 3&rarr;5</td><td>&mdash;</td><td>~40% ART reduction</td></tr>
+      </table>
+      <h3>Sprint 12: Performance Benchmarks</h3>
+      <table>
+        <tr><th>Benchmark</th><th>Result</th><th>Target</th></tr>
+        <tr><td>A* avg call time</td><td style="color:#34d399">4.81 ms</td><td>&lt;50 ms</td></tr>
+        <tr><td>Renderer FPS</td><td style="color:#34d399">86.4 FPS</td><td>&ge;60 FPS</td></tr>
+        <tr><td>10K-tick scaling</td><td style="color:#34d399">Pass</td><td>&lt;10 min</td></tr>
+      </table>
+      <h3>Optimisations Applied</h3>
+      <ul>
+        <li>Sparse A* dicts + closed-set pruning + haversine cache</li>
+        <li>Sprite &amp; HUD surface caching in renderer</li>
+        <li>Streaming O(1) ART computation</li>
+      </ul>
+    </div>
+  </div>
+  <p class="source">Data: outputs/sensitivity_report.md, outputs/figures/sensitivity_fleet_size.png, outputs/figures/sensitivity_lambda.png, scripts/benchmark_astar.py</p>
+  <div class="slide-num">6 / 8</div>
+</div>
+
+<!-- SLIDE 7: Limitations -->
+<div class="slide" id="s7">
+  <h2>Limitations</h2>
+  <div class="two-col">
+    <div>
+      <h3>Model Simplifications</h3>
+      <ul>
+        <li>Single map topology (Model Town) — not tested on other cities</li>
+        <li>Uniform Poisson event rate — real demand has spatial/temporal patterns</li>
+        <li>Ambulances move at constant speed — no acceleration or traffic signals</li>
+        <li>Events resolved in fixed ticks — no variable treatment time</li>
+        <li>No hospital transport modelled — ambulance returns to base after scene</li>
+      </ul>
+    </div>
+    <div>
+      <h3>Technical Constraints</h3>
+      <ul>
+        <li>GA uses single-objective fitness — no multi-criteria optimisation</li>
+        <li>HDBSCAN is custom-built — may differ from scikit-learn reference</li>
+        <li>Distance matrix is pre-computed — doesn't reflect live congestion</li>
+        <li>Sensitivity sweep tested 215 configs — not exhaustive tuning</li>
+        <li>Pygame rendering under SDL dummy may not reflect true visual FPS</li>
+      </ul>
+      <h3>Future Work</h3>
+      <ul>
+        <li>Multi-city graph support &amp; real-world OSM data</li>
+        <li>Reinforcement learning for dynamic dispatch decisions</li>
+        <li>Hospital routing, capacity modelling &amp; patient handoff</li>
+      </ul>
+    </div>
+  </div>
+  <p class="source">Data: README.md, src/simulation/ambulance.py, src/genetic_algorithm.py</p>
+  <div class="slide-num">7 / 8</div>
+</div>
+
+<!-- SLIDE 8: Conclusion -->
+<div class="slide" id="s8">
+  <h2>Conclusion</h2>
+  <div style="max-width:900px">
+    <p style="font-size:22px;margin-bottom:20px">ResQ-Graph demonstrates that <span class="highlight">AI-optimised station placement significantly reduces emergency response times</span> compared to random placement.</p>
+    <div class="stat-grid" style="grid-template-columns:repeat(4,1fr)">
+      <div class="stat-card"><div class="num" style="font-size:30px;color:#34d399">+11.8%</div><div class="label">ART Improvement</div></div>
+      <div class="stat-card"><div class="num" style="font-size:30px">p=0.001</div><div class="label">Significance</div></div>
+      <div class="stat-card"><div class="num" style="font-size:30px;color:#34d399">4.81ms</div><div class="label">A* Pathfinding</div></div>
+      <div class="stat-card"><div class="num" style="font-size:30px;color:#34d399">86 FPS</div><div class="label">Renderer Speed</div></div>
+    </div>
+    <h3 style="margin-top:24px">Key Takeaways</h3>
+    <ul>
+      <li>GA-optimised fleet achieves 22.77 ART vs 25.81 baseline (p&lt;0.01, Cohen's d=1.54)</li>
+      <li>Sweet spot at 7 ambulances — adding more yields diminishing returns</li>
+      <li>Custom HDBSCAN hotspot detection enables proactive rebalancing every 25 ticks</li>
+      <li>Full system validated with 224 automated tests, CI pipeline, and 215-run sensitivity sweep</li>
+    </ul>
+  </div>
+  <p class="source">Data: outputs/comparison_metrics.json, outputs/baseline_results.csv, outputs/ai_results.csv</p>
+  <div class="slide-num">8 / 8</div>
+</div>
+
+<nav>
+  <button onclick="prev()">&#9664; Prev</button>
+  <button onclick="next()">Next &#9654;</button>
+</nav>
+
+<script>
+let cur=0;const slides=document.querySelectorAll('.slide');
+function show(i){slides.forEach(s=>s.classList.remove('active'));slides[i].classList.add('active')}
+function next(){if(cur<slides.length-1){cur++;show(cur)}}
+function prev(){if(cur>0){cur--;show(cur)}}
+document.addEventListener('keydown',e=>{if(e.key==='ArrowRight'||e.key===' ')next();if(e.key==='ArrowLeft')prev()});
+</script>
+</body>
+</html>
